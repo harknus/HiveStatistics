@@ -1,2 +1,8 @@
 #ignore all game files
 *.sgf
+
+.DS_Store
+
+__MACOSX
+
+Thumbs.db
