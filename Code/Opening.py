@@ -91,7 +91,18 @@ class Opening :
         #         nrDrawGames, draw percentage, 
         #         listOfWhiteWinGames, listOfBlackWinGames, listOfDrawnGames
         
-        result = self.openingGame.name + ','
+        #If only filtering on the first 2 opening bugs then auto-name the opening
+        if len(self.openingGame.pieces) == 2:
+            
+            for p in self.openingGame.pieces:
+                if p.color == 'white':
+                    wstr = p.name
+                else:
+                    bstr = p.name
+            result = wstr + ' - ' + bstr + ','
+        else:     
+            result = self.openingGame.name + ','
+            
         result += self.getEntURL() + ','
         result += str(stat['TotNrGames']) + ','
         result += str(len(self.whiteWinGamesPaths)) + ','

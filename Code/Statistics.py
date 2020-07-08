@@ -64,6 +64,7 @@ class Statistics :
         file = open(savePath, 'w+', encoding="utf-8")
         
         csvStr  = 'Game Type:,' + self.gameType + '\n'
+        csvStr += 'TotNrGames:,' + str(self.totalNrGames) + '\n'
         csvStr += 'Opening name, Entomology URL, Total nr of games, '
         csvStr += 'Nr white wins, White win percentage, '
         csvStr += 'Nr black games, Black win percentage, '

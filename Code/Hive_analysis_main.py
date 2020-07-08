@@ -30,8 +30,8 @@ print("Starting Hive game analyzis...")
 #print(listOfGames)
 #print(listOfGames[0])
 
-# game = HiveGame(listOfGames[3])
-# #game = HiveGame('../Hive-games/T!HV-Fraslineco92-RoXar-2020-06-12-1659.sgf')
+# game = HiveGame.importOpeningFromBSFile(listOfGames[3])
+# #game = HiveGame().importOpeningFromBSFile('../Hive-games/T!HV-Fraslineco92-RoXar-2020-06-12-1659.sgf')
 # # print (game.name)
 # # print (game.pieces)
 
@@ -51,10 +51,23 @@ listOfGames = glob2.glob('../Hive-games/**/*.sgf')
 
 stat = dict() #Initalize the statistics dictionary
 totNrOfGames = len(listOfGames)
+
+checkOnlyPLM = True
+checkOnlyTournamentRuleGames = True
+
+# type of analysis classification
+#analysisType = 'TwoBugOpening'
+analysisType = '8 first moves openings'
+
+
 for index, gamePath in enumerate(listOfGames):
     if index % 100 == 0:
         print('Progress:' + '{0:.2f}'.format(100*index/totNrOfGames) +'%')
-    nextGame = HiveGame(gamePath).toStandardPosition()
+    
+    if analysisType == 'TwoBugOpening':
+        nextGame = HiveGame().importFirstTwoPiecesFromBSFile(gamePath, checkOnlyPLM, checkOnlyTournamentRuleGames)
+    else:
+        nextGame = HiveGame().importOpeningFromBSFile(gamePath).toStandardPosition()
 
     #Skip malformatted games   
     if (nextGame == None) or (not hasattr(nextGame, 'gameResult')):
@@ -78,6 +91,7 @@ totalNrOfProcessedGames = 0;
 for key in stat:
    totalNrOfProcessedGames += stat[key].totalNrGames
 
+print("Classification" + analysisType)
 print("Total number of game files: " + str(totNrOfGames))
 print("Total number of games processed: " + str(totalNrOfProcessedGames) )
 print("Number of games skipped: " + str(totNrOfGames - totalNrOfProcessedGames) )
@@ -95,6 +109,10 @@ blackWinSort = sorted(openingsSorted[0:30], key=lambda x: x.getStatistics()['Per
 #print (str(blackWinSort))
 
 #Save the results to a .csv file
-filePath = "../Statistics/OpeningStatistics.csv"
+if analysisType == 'TwoBugOpening':
+    filePath = "../Statistics/TwoBugOpeningStatistics.csv"
+else:
+    filePath = "../Statistics/8-moveOpeningStatistics.csv"
+
 stat['Hive-PLM'].exportCSVFile(filePath)
 

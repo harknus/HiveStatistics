@@ -8,6 +8,7 @@ Created on Thu Jun 18 10:31:36 2020
 import os
 import re
 import webbrowser
+import codecs
 
 from Piece_class import Piece
 from Position import Position
@@ -28,6 +29,10 @@ def cleanPieceName (s):
 class HiveGame:
     #str name
     #list listOfBugs
+    
+    def __init__(self):
+        #empty for now
+        pass
     
     #check when to stop reading the game
     def shouldContinueMovingBased(self, thePiece, breakConditionType): 
@@ -68,9 +73,9 @@ class HiveGame:
         return next((x for x in self.pieces if x.name == aName), None)
     
     #use the file name to instantiate the game
-    def __init__(self, aFileName):
+    def importOpeningFromBSFile(self, aFileName):
         
-        #Fulhack parameters
+        #Ugly hack parameters
        
         #breakConditionType = 0 # break just before black moves
         #breakConditionType = 1 # break just before any piece move
@@ -81,55 +86,39 @@ class HiveGame:
         checkOnlyPLM = True
         
         
-        self.pieces = set(); # Storage for the unordered set of bugs in play
+        self.pieces = set() # Storage for the unordered set of bugs in play
         self.fileName = aFileName;
         tmp = os.path.basename(aFileName)
         self.name = os.path.splitext(tmp)[0]
-        #print(self.name)
-        
         
         #Read the file and import the opening
-        #Opening is defined as the state just 
-        #before the first black move
-        fileObject = open(aFileName, 'r', errors='ignore')
+        fileObject = open(aFileName, 'r',  encoding='utf-8', errors='ignore')
         currentMoveNr = 0
         for line in fileObject:
             
+            #If we should only process PLM games check if this 
+            #game is a PLM game, if not skip it and stop reading
             if "SU[" in line:
                 self.gameType = findBetween(line, "SU[", "]").lower()
                 #Skip all games that are not PLM
                 if checkOnlyPLM and self.gameType != 'Hive-PLM'.lower():
                     break
                 
-            #extract the game result, black or white
-            if "RE[" in line:
-                #Add support for multiple languages
-                self.gameResult = findBetween(line, "[","]");
-                    
-            if "P0[id" in line:
-                if hasattr(self, 'gameResult') != True:
-                    #There has been a reading error
-                    print ("Encoding error in file:" + aFileName)
-                    break
-                
-                whitePlayer = findBetween(line, "id \"", "\"]")
-                if whitePlayer in self.gameResult:
-                    self.gameResult = "white win"
-                
-            if "P1[id" in line:
-                blackPlayer = findBetween(line, "id \"", "\"]")
-                if blackPlayer in self.gameResult:
-                    self.gameResult = "black win"
+            if self.findOutGameResult(line) == None:
+                break
                 
             #building the opening state
             
-            if any(x in line for x in ["move", "dropb"]):
+            if any(x in line for x in ["move", "dropb", "pdropb", "Move", "Dropb", "Pdropb"]):
                 #building the opening state
                 currentMoveNr += 1
                 parts =  line.split()
                 #print(line)
-                if "dropb" in line:    
+                if ("dropb" in line) or ("pdropb" in line) \
+                    or ("Dropb" in line) or ("Pdropb" in line):    
                     #; P1[5 dropb bL1 M 12 /wM]
+                    #added pdropb and support for newer files where 
+                    #actions/moves are capitalized in the .sgf files
                     newPieceName = cleanPieceName(parts[3])
                     #print(parts[3] +" => "+ newPieceName)
                     placement = parts[6][:-1]
@@ -151,7 +140,7 @@ class HiveGame:
                 if thePiece == None :
                     if 'w' in newPieceName : color = 'white'
                     else : color = 'black'
-                    #Level 1 for all pieces that have not 
+                    #Level = 0 for all pieces that have not 
                     #climbed on top of the hive 
                     level = 0; 
                     newPiece = Piece(newPieceName, color, coordinates, level)
@@ -159,8 +148,6 @@ class HiveGame:
                     if len(self.pieces) == 1:
                         self.firstPlacedPosition  = newPiece.position
                     if len(self.pieces) == 2:
-                        #updated here and it doesn't work anymore...
-                        #self.secondPiecePlaced = newPiece
                         self.secondPlacedPosition = newPiece.position
                 
                 else: #not a newly added piece, but a piece to move
@@ -180,6 +167,103 @@ class HiveGame:
 
         #close the file - important
         fileObject.close()
+        return self
+    
+    #Convenience function for avoiding duplication of code
+    #Returns None if the game result cannot be obtained.
+    def findOutGameResult(self, line):
+       #extract the game result, black or white
+        if "RE[" in line:
+            #Add support for multiple languages
+            self.gameResult = findBetween(line, "[","]");
+                
+        if "P0[id" in line:
+            if hasattr(self, 'gameResult') != True:
+                #There has been a reading error
+                print ("Encoding error in file:" + self.fileName)
+                return None
+            
+            whitePlayer = findBetween(line, "id \"", "\"]")
+            if whitePlayer in self.gameResult:
+                self.gameResult = "white win"
+            
+        if "P1[id" in line:
+            blackPlayer = findBetween(line, "id \"", "\"]")
+            if blackPlayer in self.gameResult:
+                self.gameResult = "black win"
+        return True
+    
+    def importFirstTwoPiecesFromBSFile(self, aFileName, checkOnlyPLM, onlyTournamentRule):
+        self.pieces = set() # Storage for the unordered set of bugs in play
+        self.fileName = aFileName;
+        tmp = os.path.basename(aFileName)
+        self.name = os.path.splitext(tmp)[0]
+
+        #read the file, extract who won, and the first 2 pieces placed
+        
+        fileObject = open(aFileName, 'r',  encoding='utf-8', errors='ignore')
+        currentMoveNr = 0
+        for line in fileObject:
+            if "SU[" in line:
+                self.gameType = findBetween(line, "SU[", "]").lower()
+                #Skip all games that are not PLM
+                if checkOnlyPLM and self.gameType != 'Hive-PLM'.lower():
+                    break
+                
+            if self.findOutGameResult(line) == None:
+                break
+            
+            if any(x in line for x in ["move", "dropb", "pdropb", "Move", "Dropb", "Pdropb"]):
+                currentMoveNr += 1
+                parts =  line.split()
+                #print(line)
+                if ("dropb" in line) or ("pdropb" in line) \
+                    or ("Dropb" in line) or ("Pdropb" in line):    
+                    #; P1[5 dropb bL1 M 12 /wM]
+                    #; P1[131 Pdropb wS1 K 9 /bP]
+                    #; P0[110 Dropb wG3 O 11 wM-]
+                    newPieceName = cleanPieceName(parts[3])
+                    #print(parts[3] +" => "+ newPieceName)
+                    placement = parts[6][:-1]
+                    coordinates = parts[4] + ' ' + parts[5]
+                else:
+                    #; P0[11 move W wA1 O 14 wS2-]
+                    newPieceName = cleanPieceName(parts[4])
+                    placement = parts[7][:-1]
+                    coordinates = parts[5] + ' ' + parts[6]
+                    
+                #clean the placement from "//"='////'
+                placement = placement.replace("\\\\", "\\")
+                
+                #check that tournament rule is upheld
+                #no queens as the first 2 pieces placed
+                if (onlyTournamentRule == True) and ('Q' in newPieceName) : 
+                    break
+                
+                #check color
+                if 'w' in newPieceName : 
+                    color = 'white'
+                else: 
+                    color = 'black'
+                
+                #Level = 0 for all pieces that have not 
+                #climbed on top of the hive 
+                level = 0
+                newPiece = Piece(newPieceName, color, coordinates, level)
+
+                self.pieces.add(newPiece)
+                #Once we've found the first 2 pieces we stop reading the file
+                if len(self.pieces) == 2:
+                    break
+        
+        #close the file - important            
+        fileObject.close()
+        
+        #Captures and filters away early resigns
+        if len(self.pieces) != 2:
+            return None
+        
+        return self
     
     def __repr__(self):
         return "<Hive game: %s>" % (self.name)
@@ -209,8 +293,13 @@ class HiveGame:
     # - 60 degree rotations
     # - reflections in x-axis
     def toStandardPosition(self):
+        
+        #if we compare only the 2 first pieces then don't do anything
+        if len(self.pieces) == 2: 
+            return self
+        
         #To protect against early resign
-        if ((len(self.pieces) == 0) \
+        if ((len(self.pieces) == 0) or (len(self.pieces) == 1) \
             or (not hasattr(self, 'firstPlacedPosition')) \
             or (not hasattr(self, 'secondPlacedPosition')) \
             or (self.getPieceByName("wQ") == None)\
@@ -328,6 +417,12 @@ class HiveGame:
         if len( self.pieces ) != len( other.pieces ):
             return None
         
+        #If only two pieces in the game do only check the names as the 
+        #positions have not been rotated properly
+        shouldCheckPositions = True
+        if len(self.pieces) == 2:
+            shouldCheckPositions = None
+            
         #Then for every piece in this game find it in the other game 
         #and check if the positions agree
         for p in self.pieces :
@@ -336,20 +431,18 @@ class HiveGame:
             if p2 == None: 
                 return None
             
-            #Check position equality
-            if p2.position  != p.position:
-                return None
-            
-            #Check the layer of the pieces are equal 
-            #(as some bugs may be on top of the hive)
-            if p2.level != p.level:
-                return None
-            
+            if shouldCheckPositions == True:
+                #Check position equality
+                if p2.position  != p.position:
+                    return None
+                
+                #Check the layer of the pieces are equal 
+                #(as some bugs may be on top of the hive)
+                if p2.level != p.level:
+                    return None
+                
         #If we reach this point the games are equal
         return True
-            
-
-
 
 def testHiveGameClass():
     
@@ -360,57 +453,57 @@ def testHiveGameClass():
     #Test that the different functions work as expected.
     gameName1 = '../Hive-games/2020/games-Jun-13-2020/T!HV-Frasco92-RoXar-2020-06-12-1659.sgf'
     gameName2 = '../Hive-games/2019/games-May-21-2019/T!HV-nevir-MaxShark-2019-05-20-2000.sgf'
-    game1 = HiveGame(gameName1)
-    game1a = HiveGame(gameName1)
-    game2 = HiveGame(gameName2)
+    game1 = HiveGame().importOpeningFromBSFile(gameName1)
+    game1a = HiveGame().importOpeningFromBSFile(gameName1)
+    game2 = HiveGame().importOpeningFromBSFile(gameName2)
     
     assert not game1.isEqualTo(game2)
     assert not game1.toStandardPosition().isEqualTo(game2.toStandardPosition())
     
     #Load the same game twice
-    game1 = HiveGame(gameName2)
-    game2 = HiveGame(gameName2)
+    game1 = HiveGame().importOpeningFromBSFile(gameName2)
+    game2 = HiveGame().importOpeningFromBSFile(gameName2)
     assert game1.isEqualTo(game2) == True
     assert game1.toStandardPosition().toStandardPosition().isEqualTo(game2.toStandardPosition()) == True
     
     #Need to reset the games once modified
-    game1 = HiveGame(gameName1)
-    game2 = HiveGame(gameName2)
+    game1 = HiveGame().importOpeningFromBSFile(gameName1)
+    game2 = HiveGame().importOpeningFromBSFile(gameName2)
     
     #Test rotation and back again
     assert game1.rotGame60CCW().rotGame60CW().isEqualTo(game1a) == True
     
-    game1 = HiveGame(gameName1)
-    game1a = HiveGame(gameName1)
+    game1 = HiveGame().importOpeningFromBSFile(gameName1)
+    game1a = HiveGame().importOpeningFromBSFile(gameName1)
     assert game1.rotGame60CW().rotGame60CCW().isEqualTo(game1a) == True
     
-    game1 = HiveGame(gameName1)
-    game1a = HiveGame(gameName1)
+    game1 = HiveGame().importOpeningFromBSFile(gameName1)
+    game1a = HiveGame().importOpeningFromBSFile(gameName1)
     assert game1.rotGame60CW().rotGame60CW().isEqualTo(game1a.rotGame120CW()) == True
     
-    game1 = HiveGame(gameName1)
-    game1a = HiveGame(gameName1)
+    game1 = HiveGame().importOpeningFromBSFile(gameName1)
+    game1a = HiveGame().importOpeningFromBSFile(gameName1)
     assert game1.rotGame120CCW().rotGame120CW().isEqualTo(game1a) == True
     
-    game1 = HiveGame(gameName1)
-    game1a = HiveGame(gameName1)
+    game1 = HiveGame().importOpeningFromBSFile(gameName1)
+    game1a = HiveGame().importOpeningFromBSFile(gameName1)
     assert game1.reflGameXaxis().reflGameXaxis().isEqualTo(game1a) == True
     
-    game1 = HiveGame(gameName1)
-    game1a = HiveGame(gameName1)
+    game1 = HiveGame().importOpeningFromBSFile(gameName1)
+    game1a = HiveGame().importOpeningFromBSFile(gameName1)
     assert game1.rotGame180().rotGame180().isEqualTo(game1a) == True
     
-    game1 = HiveGame(gameName1)
-    game1a = HiveGame(gameName1)
+    game1 = HiveGame().importOpeningFromBSFile(gameName1)
+    game1a = HiveGame().importOpeningFromBSFile(gameName1)
     assert game1.rotGame180().rotGame60CW().rotGame120CW().isEqualTo(game1a) == True
     
     #Test transformation to standard position
-    game1 = HiveGame(gameName1)
-    game1a = HiveGame(gameName1)
+    game1 = HiveGame().importOpeningFromBSFile(gameName1)
+    game1a = HiveGame().importOpeningFromBSFile(gameName1)
     assert game1.toStandardPosition().isEqualTo(game1a.translateGameBy(Position(-1,0))) == True
     
-    game1 = HiveGame(gameName1)
-    game1a = HiveGame(gameName1)
+    game1 = HiveGame().importOpeningFromBSFile(gameName1)
+    game1a = HiveGame().importOpeningFromBSFile(gameName1)
     assert game1.isEqualTo(game1a) == True
     game1a.gameType = 'Hive-PL'
     assert not game1.toStandardPosition().isEqualTo(game1a.toStandardPosition())
