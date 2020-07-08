@@ -67,7 +67,7 @@ class Statistics :
         csvStr += 'TotNrGames:,' + str(self.totalNrGames) + '\n'
         csvStr += 'Opening name, Entomology URL, Total nr of games, '
         csvStr += 'Nr white wins, White win percentage, '
-        csvStr += 'Nr black games, Black win percentage, '
+        csvStr += 'Nr black wins, Black win percentage, '
         csvStr += 'Nr draws, Draw percentage, '
         csvStr += 'List of white win games, List of black win games, List of drawn games\n'
         
