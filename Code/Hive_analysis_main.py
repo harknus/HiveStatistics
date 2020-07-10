@@ -57,7 +57,7 @@ checkOnlyTournamentRuleGames = True
 
 # type of analysis classification
 analysisType = 'TwoBugOpening'
-# analysisType = '8 first moves openings'
+#analysisType = '8 first moves openings'
 
 
 for index, gamePath in enumerate(listOfGames):

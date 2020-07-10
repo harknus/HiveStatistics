@@ -592,3 +592,7 @@ def testHiveGameClass():
     game1 = HiveGame().importOpeningFromBSFile(gameName)
     assert game1.gameResult == "white win"
     
+    
+    gameName = '../Hive-games/2020/games-May-5-2020/HV-Rufeo612-WeakBot1-2020-05-04-1609.sgf'
+    game1 = HiveGame().importOpeningFromBSFile(gameName)
+    assert game1.gameResult == "black win"
