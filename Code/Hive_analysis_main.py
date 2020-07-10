@@ -56,12 +56,12 @@ checkOnlyPLM = True
 checkOnlyTournamentRuleGames = True
 
 # type of analysis classification
-#analysisType = 'TwoBugOpening'
-analysisType = '8 first moves openings'
+analysisType = 'TwoBugOpening'
+#analysisType = '8 first moves openings'
 
 
 for index, gamePath in enumerate(listOfGames):
-    if index % 100 == 0:
+    if index % 1000 == 0:
         print('Progress:' + '{0:.2f}'.format(100*index/totNrOfGames) +'%')
     
     if analysisType == 'TwoBugOpening':

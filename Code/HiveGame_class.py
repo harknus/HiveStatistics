@@ -8,7 +8,6 @@ Created on Thu Jun 18 10:31:36 2020
 import os
 import re
 import webbrowser
-import codecs
 
 from Piece_class import Piece
 from Position import Position
@@ -68,10 +67,27 @@ class HiveGame:
         else:
             return True
             
-    
-    def getPieceByName(self, aName):
-        return next((x for x in self.pieces if x.name == aName), None)
-    
+    #returns the first piece found with the name by default
+    #if disregardPieceNumber = True and more than 1 piece match a list of 
+    #the matching pieces is returned
+    def getPieceByName(self, aName, disregardPieceNumber=False):
+        
+        if disregardPieceNumber == False :
+            return next((x for x in self.pieces if x.name == aName), None)
+        else :
+            if not any(char.isdigit() for char in aName): 
+                return next((x for x in self.pieces if x.name == aName), None)
+            else: 
+                aName = re.sub(r"\d+", "", aName)
+                retlist = [x for x in self.pieces if re.sub(r"\d+", "", x.name) == aName]
+                if len(retlist) == 0:
+                    return None
+                if len(retlist) == 1:
+                    return retlist[0]
+                else :
+                    return retlist
+                
+            
     #use the file name to instantiate the game
     def importOpeningFromBSFile(self, aFileName):
         
@@ -172,7 +188,13 @@ class HiveGame:
     #Convenience function for avoiding duplication of code
     #Returns None if the game result cannot be obtained.
     def findOutGameResult(self, line):
-       #extract the game result, black or white
+        #extract the game result, black or white
+        if "CM[1,0]" in line:
+            self.reversedColors = True
+            print( str(self.name) )
+        if "CM[0,1]" in line:
+            self.reversedColors = False
+        
         if "RE[" in line:
             #Add support for multiple languages
             self.gameResult = findBetween(line, "[","]");
@@ -183,14 +205,27 @@ class HiveGame:
                 print ("Encoding error in file:" + self.fileName)
                 return None
             
-            whitePlayer = findBetween(line, "id \"", "\"]")
-            if whitePlayer in self.gameResult:
-                self.gameResult = "white win"
-            
+            if hasattr(self, 'reversedColors') == True:
+                if self.reversedColors == False:
+                    whitePlayer = findBetween(line, "id \"", "\"]")
+                    if whitePlayer in self.gameResult:
+                        self.gameResult = "white win"
+                else :
+                    blackPlayer = findBetween(line, "id \"", "\"]")
+                    if blackPlayer in self.gameResult:
+                        self.gameResult = "black win"
+                        
         if "P1[id" in line:
-            blackPlayer = findBetween(line, "id \"", "\"]")
-            if blackPlayer in self.gameResult:
-                self.gameResult = "black win"
+            if hasattr(self, 'reversedColors') == True:
+                if self.reversedColors == False:
+                    blackPlayer = findBetween(line, "id \"", "\"]")
+                    if blackPlayer in self.gameResult:
+                        self.gameResult = "black win"
+                else : #reversed colors
+                    whitePlayer = findBetween(line, "id \"", "\"]")
+                    if whitePlayer in self.gameResult:
+                        self.gameResult = "white win"
+                        
         return True
     
     def importFirstTwoPiecesFromBSFile(self, aFileName, checkOnlyPLM, onlyTournamentRule):
@@ -407,39 +442,52 @@ class HiveGame:
             p.position = p.position.reflXaxis()
         return self
 
-
+    #Function to evaluate if the game state is equivalent to another state
     def isEqualTo(self, other):
         #Check that the game type is the same, otherwise not relevant to compare
         if self.gameType !=  other.gameType:
-            return None
+            return False
         
         #Check if the two games have the same number of pieces
         if len( self.pieces ) != len( other.pieces ):
-            return None
+            return False
         
         #If only two pieces in the game do only check the names as the 
         #positions have not been rotated properly
         shouldCheckPositions = True
         if len(self.pieces) == 2:
-            shouldCheckPositions = None
+            shouldCheckPositions = False
             
         #Then for every piece in this game find it in the other game 
         #and check if the positions agree
         for p in self.pieces :
-            p2 = other.getPieceByName(p.name);
+            p2 = other.getPieceByName(p.name, True);
             #if the piece is not in the other game => not equal
             if p2 == None: 
-                return None
+                return False
             
             if shouldCheckPositions == True:
-                #Check position equality
-                if p2.position  != p.position:
-                    return None
+                #if several bugs of the same type are found check for 
+                #match for one position if so then ok
+                if isinstance(p2,list) :
+                    equalBugInList = False
+                    for piece in p2 : #iterate through the equal-type bugs
+                        if piece.position == p.position \
+                            and piece.level == p.level:
+                           #then we've found the correct bug matching with p
+                           equalBugInList = True
+                    if equalBugInList == False:
+                        return False
+                    
+                else: #not a list then a single bug
+                    #Check position equality
+                    if p2.position  != p.position:
+                        return False
                 
-                #Check the layer of the pieces are equal 
-                #(as some bugs may be on top of the hive)
-                if p2.level != p.level:
-                    return None
+                    #Check the layer of the pieces are equal 
+                    #(as some bugs may be on top of the hive)
+                    if p2.level != p.level:
+                        return False
                 
         #If we reach this point the games are equal
         return True
@@ -507,4 +555,22 @@ def testHiveGameClass():
     assert game1.isEqualTo(game1a) == True
     game1a.gameType = 'Hive-PL'
     assert not game1.toStandardPosition().isEqualTo(game1a.toStandardPosition())
+    
+    #test that matching bugs with the same bugtype but name but with different nubmers 
+    #matches as equivalent games
+    gameName1 = '../Hive-games/2017/games-May-27-2017/HV-iserp-Quodlibet-2017-05-26-1516.sgf'
+    game1 = HiveGame().importOpeningFromBSFile(gameName1)
+    game2 = HiveGame().importOpeningFromBSFile(gameName1)
+    #change the names of the two wA pieces
+    wA1 = game2.getPieceByName("wA1")
+    wA2 = game2.getPieceByName("wA2")
+    wA1.name="wA2"
+    wA2.name = "wA1"
+    assert game1.isEqualTo(game2) == True
+    assert game1.toStandardPosition().isEqualTo(game2.toStandardPosition()) == True
+    
+    #assert that white won this game
+    gameName = '../Hive-games/2020/games-Apr-24-2020/HV-CBerserker-hawk81-2020-04-23-0845.sgf'
+    game1 = HiveGame().importOpeningFromBSFile(gameName)
+    assert game1.gameResult == "white win"
     
