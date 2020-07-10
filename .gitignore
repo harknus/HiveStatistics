@@ -6,3 +6,7 @@
 __MACOSX
 
 Thumbs.db
+
+*.pyc
+
+__pycache__

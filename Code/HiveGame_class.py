@@ -191,7 +191,7 @@ class HiveGame:
         #extract the game result, black or white
         if "CM[1,0]" in line:
             self.reversedColors = True
-            print( str(self.name) )
+            #print( str(self.name) )
         if "CM[0,1]" in line:
             self.reversedColors = False
         
@@ -208,23 +208,37 @@ class HiveGame:
             if hasattr(self, 'reversedColors') == True:
                 if self.reversedColors == False:
                     whitePlayer = findBetween(line, "id \"", "\"]")
-                    if whitePlayer in self.gameResult:
+                    if whitePlayer in self.gameResult \
+                        or re.sub(r"\d+", "", whitePlayer) in self.gameResult:
                         self.gameResult = "white win"
                 else :
                     blackPlayer = findBetween(line, "id \"", "\"]")
-                    if blackPlayer in self.gameResult:
+                    if blackPlayer in self.gameResult \
+                        or re.sub(r"\d+", "", blackPlayer) in self.gameResult:
                         self.gameResult = "black win"
+            else: #for older files
+                whitePlayer = findBetween(line, "id \"", "\"]")
+                if whitePlayer in self.gameResult \
+                        or re.sub(r"\d+", "", whitePlayer) in self.gameResult:
+                    self.gameResult = "white win"
                         
         if "P1[id" in line:
             if hasattr(self, 'reversedColors') == True:
                 if self.reversedColors == False:
                     blackPlayer = findBetween(line, "id \"", "\"]")
-                    if blackPlayer in self.gameResult:
+                    if blackPlayer in self.gameResult \
+                        or re.sub(r"\d+", "", blackPlayer) in self.gameResult:
                         self.gameResult = "black win"
                 else : #reversed colors
                     whitePlayer = findBetween(line, "id \"", "\"]")
-                    if whitePlayer in self.gameResult:
+                    if whitePlayer in self.gameResult \
+                        or re.sub(r"\d+", "", whitePlayer) in self.gameResult:
                         self.gameResult = "white win"
+            else: #for older files
+                blackPlayer = findBetween(line, "id \"", "\"]")
+                if blackPlayer in self.gameResult \
+                        or re.sub(r"\d+", "", blackPlayer) in self.gameResult:
+                    self.gameResult = "black win"
                         
         return True
     
@@ -571,6 +585,10 @@ def testHiveGameClass():
     
     #assert that white won this game
     gameName = '../Hive-games/2020/games-Apr-24-2020/HV-CBerserker-hawk81-2020-04-23-0845.sgf'
+    game1 = HiveGame().importOpeningFromBSFile(gameName)
+    assert game1.gameResult == "white win"
+    
+    gameName = '../Hive-games/2015/games-Apr-11-2015/HV-Dumbot-kdladage-2015-04-10-0508.sgf'
     game1 = HiveGame().importOpeningFromBSFile(gameName)
     assert game1.gameResult == "white win"
     
