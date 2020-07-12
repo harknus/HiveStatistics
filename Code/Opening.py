@@ -146,3 +146,20 @@ class Opening :
         
         print(result)
         
+def testOpeningStatistics():
+    checkOnlyPLM = True
+    checkOnlyTournamentRuleGames = True
+    gameName = '../Hive-games/2019/games-Jul-7-2019/T!HV-Eucalyx-dube-2019-06-30-0520.sgf'
+    game1 = HiveGame().importFirstTwoPiecesFromBSFile(gameName, checkOnlyPLM, checkOnlyTournamentRuleGames)
+    
+    #This game is a draw with 2 bugs only considered.
+    opening = Opening()
+    opening.addGameToStat(game1)
+    out = opening.getStatistics()
+    assert out['TotNrGames'] == 1
+    assert out['PercentWhiteWins'] == 0
+    assert out['PercentBlackWins'] == 0
+    assert out['PercentDraws'] == 100
+    assert len( opening.drawGamesPaths ) == 1
+    assert opening.openingGame == game1
+    

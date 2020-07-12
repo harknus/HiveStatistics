@@ -596,3 +596,13 @@ def testHiveGameClass():
     gameName = '../Hive-games/2020/games-May-5-2020/HV-Rufeo612-WeakBot1-2020-05-04-1609.sgf'
     game1 = HiveGame().importOpeningFromBSFile(gameName)
     assert game1.gameResult == "black win"
+    
+    
+    gameName = '../Hive-games/2019/games-Jul-7-2019/T!HV-Eucalyx-dube-2019-06-30-0520.sgf'
+    game1 = HiveGame().importOpeningFromBSFile(gameName)
+    assert game1.gameResult != "white win" or game1.gameResult != "black win"
+    
+    checkOnlyPLM = True
+    checkOnlyTournamentRuleGames = True
+    game1 = HiveGame().importFirstTwoPiecesFromBSFile(gameName, checkOnlyPLM, checkOnlyTournamentRuleGames)
+    assert game1.gameResult != "white win" or game1.gameResult != "black win"

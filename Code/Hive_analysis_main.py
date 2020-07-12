@@ -11,7 +11,7 @@ import time
 from HiveGame_class import HiveGame, testHiveGameClass
 from Position import testPositionClass
 from Statistics import Statistics
-
+from Opening import testOpeningStatistics
 
 
 #Measure time
@@ -23,6 +23,7 @@ if runTests :
     print("Running tests on Hive classes")
     testPositionClass()
     testHiveGameClass()
+    testOpeningStatistics()
     print("All tests passed")
 
 print("Starting Hive game analyzis...")
@@ -49,6 +50,35 @@ listOfGames = glob2.glob('../Hive-games/**/*.sgf')
 #listOfGames = glob2.glob('../Hive-games_tmp/**/*.sgf')
 #listOfGames.sort()
 
+#pre-filter the games
+filterOnPlayers = False
+removeRobots = True
+
+if filterOnPlayers :
+    #player = 'Gandac'
+    players = ['Eucalyx', 'Gandac', 'Frasco92', 'Loizz', 'ringersoll', \
+               'davideg', 'Quodlibet', 'fbaumann', 'tzimarou', 'stepanzo', \
+               'HappyKiwi', 'Jewdoka', 'lambda22', 'dube', 'nevir']
+    filteredListOfGames = list()
+    for p in players: 
+        filteredListOfGames.extend([k for k in listOfGames if p in k])
+    
+    
+    #remove duplicate games found
+    filteredListOfGames = list(dict.fromkeys(filteredListOfGames))
+    listOfGames = filteredListOfGames
+
+
+if removeRobots : 
+    #remove Weakbot, Dumbot, Smartbot, from the statistics
+    filteredListOfGames = list()
+    robots = ['WeakBot','Dumbot','SmartBot']
+    for g in listOfGames: 
+        if not any(x in g for x in robots):
+            filteredListOfGames.append(g)
+    listOfGames = filteredListOfGames
+
+#-------START-ANALYSING----
 stat = dict() #Initalize the statistics dictionary
 totNrOfGames = len(listOfGames)
 
