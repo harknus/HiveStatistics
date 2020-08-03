@@ -76,10 +76,57 @@ class Statistics :
         for op in self.openingStatList:
             file.write(op.getCSVResultString() + '\n')
         
-        #return csvStr
-        
-        #write to file
         file.close()
 
+    def exportSummaryStatistics(self, savePath):
+        # only works for the 2-bug opening statistics
+        # CSV format:
+        # 1st line: titles
+        # 2nd line: more titles
+        # 2n   line: bug titles white opening and black counters sorted in order of performance
+        # 2n+1 line: win percentages
         
+        cvsStr  = 'White opening, Black counter, , Hive-PLM openings \n'
+        cvsStr += 'white win rate, black win rate \n'
+               
+        #sort the data and extract out the white win percenatges given an opening
+        sortedOpeningList = sorted(self.openingStatList, key=lambda x: x.getName(), reverse=False)
         
+        #To extract out the sublist
+        subLists = list()# this is a nested list
+        wBugs = ['wM', 'wL', 'wP', 'wG', 'wA', 'wB', 'wS']
+        for wBug in wBugs:
+            openings = [x for x in sortedOpeningList if wBug in x.getName()]
+            #now calculate the white win rate for this white opening
+           
+            nrGames = 0
+            nrWhiteWins = 0
+            for op in openings:
+                nrGames += op.totalNrGames()
+                nrWhiteWins += op.getNrWhiteWins()
+            if nrGames == 0:
+                whiteWinRatio = 0
+            else:
+                whiteWinRatio = nrWhiteWins / nrGames
+                #Store it as tuples in the list
+                subLists.append( (whiteWinRatio, openings) )
+        
+        #sort the subLists on first item in the tuple (white win rate)
+        sortedSubLists = sorted(subLists,  key=lambda x: x[0], reverse=True)
+        for sublist in sortedSubLists:
+            sublist[1].sort(key=lambda x: x.getStatistics()['PercentBlackWins'], reverse = True)
+            tmp = sublist[1][0].getName()
+            cvsStr1 = tmp[:tmp.find(' ')]
+            cvsStr2 = str(sublist[0])
+            for op in sublist[1]:
+                name = op.getName()
+                cvsStr1 += ',' + name[name.find('b'):]
+                cvsStr2 += ',' + str(op.getStatistics()['PercentBlackWins']/100)
+            
+            cvsStr += cvsStr1 + '\n'
+            cvsStr += cvsStr2 + '\n'
+                       
+        #Write to file
+        file = open(savePath, 'w+', encoding="utf-8")
+        file.write(cvsStr)
+        file.close()

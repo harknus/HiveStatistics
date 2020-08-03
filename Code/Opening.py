@@ -7,6 +7,7 @@ Created on Sun Jun 28 17:37:57 2020
 import webbrowser
 import ntpath
 import os
+import re
 from HiveGame_class import HiveGame
 
 class Opening :
@@ -41,7 +42,7 @@ class Opening :
         whiteWins = stat['PercentWhiteWins']
         blackWins = stat['PercentBlackWins']
         draws = stat['PercentDraws']
-        gameName = self.openingGame.name
+        gameName = self.getName()
         return '{0:s} :: N={1:d} ww={2:.0f}% bw={3:.0f}% d={4:.0f}% \n'\
             .format(gameName, totNr, whiteWins, blackWins, draws)
     
@@ -80,6 +81,27 @@ class Opening :
         
         return baseURL + title
 
+    def getName(self):
+         #If only filtering on the first 2 opening bugs then auto-name the opening
+        if len(self.openingGame.pieces) == 2:
+            for p in self.openingGame.pieces:
+                if p.color == 'white':
+                    wstr = re.sub(r"\d+", "", p.name) #remove any numbering of the piece
+                else:
+                    bstr = re.sub(r"\d+", "", p.name) #remove any numbering of the piece
+            return wstr + ' - ' + bstr
+        else:     
+            return self.openingGame.name
+            
+    def getNrWhiteWins(self):
+        return len(self.whiteWinGamesPaths)
+    
+    def getNrBlackWins(self):
+        return len(self.blackWinGamesPaths)
+    
+    def getNrDraws(self):
+        return len(self.drawGamesPaths)
+
     def getCSVResultString(self):
         # protect ',' symbols by putting "" around the cells
         stat = self.getStatistics()
@@ -91,25 +113,15 @@ class Opening :
         #         nrDrawGames, draw percentage, 
         #         listOfWhiteWinGames, listOfBlackWinGames, listOfDrawnGames
         
-        #If only filtering on the first 2 opening bugs then auto-name the opening
-        if len(self.openingGame.pieces) == 2:
-            
-            for p in self.openingGame.pieces:
-                if p.color == 'white':
-                    wstr = p.name
-                else:
-                    bstr = p.name
-            result = wstr + ' - ' + bstr + ','
-        else:     
-            result = self.openingGame.name + ','
+        result = self.getName() + ','
             
         result += self.getEntURL() + ','
         result += str(stat['TotNrGames']) + ','
-        result += str(len(self.whiteWinGamesPaths)) + ','
+        result += str(self.getNrWhiteWins()) + ','
         result += str(stat['PercentWhiteWins']) + ','
-        result += str(len(self.blackWinGamesPaths)) + ','
+        result += str(self.getNrBlackWins()) + ','
         result += str(stat['PercentBlackWins']) + ','
-        result += str(len(self.drawGamesPaths)) + ','
+        result += str(self.getNrDraws()) + ','
         result += str(stat['PercentDraws']) + ','
         
         result += '"'

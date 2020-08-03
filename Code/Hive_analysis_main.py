@@ -51,14 +51,23 @@ listOfGames = glob2.glob('../Hive-games/**/*.sgf')
 #listOfGames.sort()
 
 #pre-filter the games
-filterOnPlayers = False
-removeRobots = True
+filterOnPlayers = True
+removeRobots = False
 
 if filterOnPlayers :
     #player = 'Gandac'
-    players = ['Eucalyx', 'Gandac', 'Frasco92', 'Loizz', 'ringersoll', \
-               'davideg', 'Quodlibet', 'fbaumann', 'tzimarou', 'stepanzo', \
-               'HappyKiwi', 'Jewdoka', 'lambda22', 'dube', 'nevir']
+    # players = ['Frasco92']
+    #players = ['Loizz']
+    #players = ['HappyKiwi']
+    #players = ['Eucalyx']
+    players = ['Quodlibet']
+    
+    #players = ['Eucalyx', 'Gandac', 'Frasco92', 'Loizz', 'ringersoll', \
+               # 'davideg', 'Quodlibet', 'fbaumann', 'tzimarou', 'stepanzo', \
+               # 'HappyKiwi', 'Jewdoka', 'lambda22', 'dube', 'nevir', \
+               # 'saltylick', 'csigeee', 'dube', 'MaxShark', 'stepanzo',\
+               # 'tzimarou', 'VYCMajor', 'fbaumann', 'Pseudomon', 'ClaudiuMe',\
+               # 'hawk81']
     filteredListOfGames = list()
     for p in players: 
         filteredListOfGames.extend([k for k in listOfGames if p in k])
@@ -140,7 +149,9 @@ blackWinSort = sorted(openingsSorted[0:30], key=lambda x: x.getStatistics()['Per
 
 #Save the results to a .csv file
 if analysisType == 'TwoBugOpening':
+    
     filePath = "../Statistics/TwoBugOpeningStatistics.csv"
+    stat['Hive-PLM'].exportSummaryStatistics("../Statistics/TwoBugSummaryStatistics.csv");
 else:
     filePath = "../Statistics/8-moveOpeningStatistics.csv"
 
