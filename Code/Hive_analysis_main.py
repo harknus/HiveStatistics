@@ -89,6 +89,7 @@ if removeRobots :
 
 #-------START-ANALYSING----
 stat = dict() #Initalize the statistics dictionary
+
 totNrOfGames = len(listOfGames)
 
 checkOnlyPLM = True
@@ -117,7 +118,9 @@ for index, gamePath in enumerate(listOfGames):
         typeKey = 'Hive-PLM' #Just to make the output prettier
     if not typeKey in stat:
         stat[typeKey] = Statistics(typeKey); #Create a new statistics class for the game type
-    
+        if filterOnPlayers and len(players) == 1:
+            stat[typeKey].setPlayerToProfile(players[0])
+        
     stat[typeKey].processGame(nextGame)
 
 

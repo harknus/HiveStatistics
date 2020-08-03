@@ -207,40 +207,49 @@ class HiveGame:
             
             if hasattr(self, 'reversedColors') == True:
                 if self.reversedColors == False:
-                    whitePlayer = findBetween(line, "id \"", "\"]")
-                    if whitePlayer in self.gameResult \
-                        or re.sub(r"\d+", "", whitePlayer) in self.gameResult:
+                    self.whitePlayer = findBetween(line, "id \"", "\"]")
+                    if self.whitePlayer in self.gameResult \
+                        or re.sub(r"\d+", "", self.whitePlayer) in self.gameResult:
                         self.gameResult = "white win"
                 else :
-                    blackPlayer = findBetween(line, "id \"", "\"]")
-                    if blackPlayer in self.gameResult \
-                        or re.sub(r"\d+", "", blackPlayer) in self.gameResult:
+                    self.blackPlayer = findBetween(line, "id \"", "\"]")
+                    if self.blackPlayer in self.gameResult \
+                        or re.sub(r"\d+", "", self.blackPlayer) in self.gameResult:
                         self.gameResult = "black win"
             else: #for older files
-                whitePlayer = findBetween(line, "id \"", "\"]")
-                if whitePlayer in self.gameResult \
-                        or re.sub(r"\d+", "", whitePlayer) in self.gameResult:
+                self.whitePlayer = findBetween(line, "id \"", "\"]")
+                if self.whitePlayer in self.gameResult \
+                        or re.sub(r"\d+", "", self.whitePlayer) in self.gameResult:
                     self.gameResult = "white win"
                         
         if "P1[id" in line:
             if hasattr(self, 'reversedColors') == True:
                 if self.reversedColors == False:
-                    blackPlayer = findBetween(line, "id \"", "\"]")
-                    if blackPlayer in self.gameResult \
-                        or re.sub(r"\d+", "", blackPlayer) in self.gameResult:
+                    self.blackPlayer = findBetween(line, "id \"", "\"]")
+                    if self.blackPlayer in self.gameResult \
+                        or re.sub(r"\d+", "", self.blackPlayer) in self.gameResult:
                         self.gameResult = "black win"
                 else : #reversed colors
-                    whitePlayer = findBetween(line, "id \"", "\"]")
-                    if whitePlayer in self.gameResult \
-                        or re.sub(r"\d+", "", whitePlayer) in self.gameResult:
+                    self.whitePlayer = findBetween(line, "id \"", "\"]")
+                    if self.whitePlayer in self.gameResult \
+                        or re.sub(r"\d+", "", self.whitePlayer) in self.gameResult:
                         self.gameResult = "white win"
             else: #for older files
-                blackPlayer = findBetween(line, "id \"", "\"]")
-                if blackPlayer in self.gameResult \
-                        or re.sub(r"\d+", "", blackPlayer) in self.gameResult:
+                self.blackPlayer = findBetween(line, "id \"", "\"]")
+                if self.blackPlayer in self.gameResult \
+                        or re.sub(r"\d+", "", self.blackPlayer) in self.gameResult:
                     self.gameResult = "black win"
                         
         return True
+    
+    def getWinningPlayer(self):
+        if hasattr(self, 'gameResult'):
+            if 'white win' in self.gameResult:
+                return self.whitePlayer
+            elif 'black win' in self.gameResult:
+                return self.blackPlayer
+        return 'No winner'
+            
     
     def importFirstTwoPiecesFromBSFile(self, aFileName, checkOnlyPLM, onlyTournamentRule):
         self.pieces = set() # Storage for the unordered set of bugs in play
@@ -591,18 +600,22 @@ def testHiveGameClass():
     gameName = '../Hive-games/2015/games-Apr-11-2015/HV-Dumbot-kdladage-2015-04-10-0508.sgf'
     game1 = HiveGame().importOpeningFromBSFile(gameName)
     assert game1.gameResult == "white win"
+    assert game1.getWinningPlayer() == 'Dumbot'
     
     
     gameName = '../Hive-games/2020/games-May-5-2020/HV-Rufeo612-WeakBot1-2020-05-04-1609.sgf'
     game1 = HiveGame().importOpeningFromBSFile(gameName)
     assert game1.gameResult == "black win"
-    
+    assert game1.getWinningPlayer() == 'WeakBot1'
+        
     
     gameName = '../Hive-games/2019/games-Jul-7-2019/T!HV-Eucalyx-dube-2019-06-30-0520.sgf'
     game1 = HiveGame().importOpeningFromBSFile(gameName)
     assert game1.gameResult != "white win" or game1.gameResult != "black win"
+    assert game1.getWinningPlayer() == 'No winner'
     
     checkOnlyPLM = True
     checkOnlyTournamentRuleGames = True
     game1 = HiveGame().importFirstTwoPiecesFromBSFile(gameName, checkOnlyPLM, checkOnlyTournamentRuleGames)
     assert game1.gameResult != "white win" or game1.gameResult != "black win"
+    assert game1.getWinningPlayer() == 'No winner'

@@ -17,8 +17,49 @@ class Opening :
         self.whiteWinGamesPaths = list() #File paths to the games
         self.blackWinGamesPaths = list()
         self.drawGamesPaths = list()
-        
-        
+
+    #sets the player to profile in the statistics generation
+    def setPlayerToProfile(self, player):
+        self.playerToProfile = player
+        self.playerWinsAsWhitePaths = list()
+        self.playerDrawsAsWhitePaths = list()
+        self.playerLoseAsWhitePaths = list()
+        self.playerWinsAsBlackPaths = list()
+        self.playerDrawsAsBlackPaths = list()
+        self.playerLoseAsBlackPaths = list()
+    
+    
+    def hasPlayerToProfile(self):
+        return hasattr(self, 'playerToProfile')
+    
+    def getPlayerStatistics(self):
+        if self.hasPlayerToProfile() :
+            nrPlayerWinsWhite  = len(self.playerWinsAsWhitePaths)
+            nrPlayerDrawsWhite = len(self.playerDrawsAsWhitePaths)
+            nrPlayerLoseWhite  = len(self.playerLoseAsBlackPaths)
+            nrPlayerWinsBlack  = len(self.playerWinsAsBlackPaths)
+            nrPlayerDrawsBlack = len(self.playerDrawsAsBlackPaths)
+            nrPlayerLoseBlack  = len(self.playerLoseAsBlackPaths)
+            totalNrGames = nrPlayerWinsWhite \
+                + nrPlayerDrawsWhite \
+                + nrPlayerLoseWhite \
+                + nrPlayerWinsBlack \
+                + nrPlayerDrawsBlack \
+                + nrPlayerLoseBlack 
+            
+            results = {'Opening'        : self.getName(), \
+                       'Player'         : self.playerToProfile, \
+                       'TotalNrGames'   : totalNrGames, \
+                       'NrWinsAsWhite'  : nrPlayerWinsWhite, \
+                       'NrDrawsAsWhite' : nrPlayerDrawsWhite, \
+                       'NrLossesAsWhite': nrPlayerLoseWhite, \
+                       'NrWinsAsBlack'  : nrPlayerWinsBlack, \
+                       'NrDrawsAsBlack' : nrPlayerDrawsBlack, \
+                       'NrLossesAsBlack': nrPlayerWinsBlack }
+            return results
+        else:
+            return None
+    
     def totalNrGames(self):
         return len(self.whiteWinGamesPaths) \
                + len(self.blackWinGamesPaths) \
@@ -60,11 +101,27 @@ class Opening :
         #Add game path to correct list
         if aGame.gameResult == 'white win':
             self.whiteWinGamesPaths.append(aGame.fileName)
+            if self.hasPlayerToProfile():
+                if aGame.whitePlayer == self.playerToProfile :
+                    self.playerWinsAsWhitePaths.append(aGame.fileName)
+                else : 
+                    self.playerLoseAsBlackPaths.append(aGame.fileName)
+                
         elif aGame.gameResult == 'black win':
             self.blackWinGamesPaths.append(aGame.fileName)
+            if self.hasPlayerToProfile():
+                if aGame.blackPlayer == self.playerToProfile :
+                    self.playerWinsAsBlackPaths.append(aGame.fileName)
+                else : 
+                    self.playerLoseAsWhitePaths.append(aGame.fileName)
         else : 
             #RE[The game is a draw]
             self.drawGamesPaths.append(aGame.fileName)
+            if self.hasPlayerToProfile():
+               if aGame.whitePlayer == self.playerToProfile :
+                   self.playerDrawsAsWhitePaths.append(aGame.fileName)
+               else : 
+                   self.playerDrawsAsBlackPaths.append(aGame.fileName)
 
     def getEntURL(self):
         baseURL = self.openingGame.getEntString()
@@ -166,6 +223,7 @@ def testOpeningStatistics():
     
     #This game is a draw with 2 bugs only considered.
     opening = Opening()
+    opening.setPlayerToProfile('Eucalyx')
     opening.addGameToStat(game1)
     out = opening.getStatistics()
     assert out['TotNrGames'] == 1
@@ -173,5 +231,26 @@ def testOpeningStatistics():
     assert out['PercentBlackWins'] == 0
     assert out['PercentDraws'] == 100
     assert len( opening.drawGamesPaths ) == 1
+    assert len( opening.whiteWinGamesPaths ) == 0 
+    assert len( opening.blackWinGamesPaths ) == 0
+    
+    assert len( opening.playerWinsAsWhitePaths )  == 0
+    assert len( opening.playerDrawsAsWhitePaths ) == 1
+    assert len( opening.playerLoseAsWhitePaths )  == 0 
+    assert len( opening.playerWinsAsBlackPaths )  == 0
+    assert len( opening.playerDrawsAsBlackPaths ) == 0
+    assert len( opening.playerLoseAsBlackPaths )  == 0
     assert opening.openingGame == game1
+    
+    results = opening.getPlayerStatistics() 
+    facit = {'Opening' : 'wP - bM', \
+             'Player'         : 'Eucalyx', \
+             'TotalNrGames'   : 1, \
+             'NrWinsAsWhite'  : 0, \
+             'NrDrawsAsWhite' : 1, \
+             'NrLossesAsWhite': 0, \
+             'NrWinsAsBlack'  : 0, \
+             'NrDrawsAsBlack' : 0, \
+             'NrLossesAsBlack': 0}
+    assert results == facit
     

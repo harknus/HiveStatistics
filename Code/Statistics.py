@@ -15,6 +15,8 @@ class Statistics :
         self.totalNrGames = 0;
         self.openingStatList = list() #holds the statistics for the openings for the same index
                
+    def setPlayerToProfile(self, player):
+        self.playerToProfile = player
         
     def processGame(self, game):
         self.totalNrGames += 1
@@ -30,6 +32,8 @@ class Statistics :
         if not found:
             #create a new Opening statistics object
             newOpeningStatistics = Opening()
+            if  hasattr(self, 'playerToProfile'):
+                newOpeningStatistics.setPlayerToProfile(self.playerToProfile)
             newOpeningStatistics.addGameToStat(game)
             self.openingStatList.append(newOpeningStatistics)
         
