@@ -40,16 +40,13 @@ class Opening :
             nrPlayerWinsBlack  = len(self.playerWinsAsBlackPaths)
             nrPlayerDrawsBlack = len(self.playerDrawsAsBlackPaths)
             nrPlayerLoseBlack  = len(self.playerLoseAsBlackPaths)
-            totalNrGames = nrPlayerWinsWhite \
-                + nrPlayerDrawsWhite \
-                + nrPlayerLoseWhite \
-                + nrPlayerWinsBlack \
-                + nrPlayerDrawsBlack \
-                + nrPlayerLoseBlack 
+            totalNrGamesAsWhite = nrPlayerWinsWhite + nrPlayerDrawsWhite + nrPlayerLoseWhite
+            totalNrGamesAsBlack = nrPlayerWinsBlack + nrPlayerDrawsBlack + nrPlayerLoseBlack 
             
             results = {'Opening'        : self.getName(), \
                        'Player'         : self.playerToProfile, \
-                       'TotalNrGames'   : totalNrGames, \
+                       'TotalNrGamesAsWhite'   : totalNrGamesAsWhite, \
+                       'TotalNrGamesAsBlack'   : totalNrGamesAsBlack, \
                        'NrWinsAsWhite'  : nrPlayerWinsWhite, \
                        'NrDrawsAsWhite' : nrPlayerDrawsWhite, \
                        'NrLossesAsWhite': nrPlayerLoseWhite, \
@@ -214,7 +211,78 @@ class Opening :
             result = result + os.path.splitext(ntpath.basename(l2))[0] + '\n'
         
         print(result)
+    
+    def getPlayerAsWhiteCSVData(self):
+        #cvs format: 
+        # White opening - Black counter (player), 
+        # Fraction of player wins, 
+        # Fraction of player losses, 
+        # Fraction of draws, 
+        # Nr of games, 
+        # List of games won, 
+        # List of games lost, 
+        # List of games drawn
         
+        stat = self.getPlayerStatistics()
+        cvsStr  = self.getName()
+        if stat['TotalNrGamesAsWhite'] != 0:
+            cvsStr += ',' + str(stat['NrWinsAsWhite']/stat['TotalNrGamesAsWhite'])
+            cvsStr += ',' + str(stat['NrLossesAsWhite']/stat['TotalNrGamesAsWhite'])
+            cvsStr += ',' + str(stat['NrDrawsAsWhite']/stat['TotalNrGamesAsWhite'])
+            cvsStr += ',' + str(stat['TotalNrGamesAsWhite'])
+        else:
+            cvsStr += ',0,0,0,0'
+        cvsStr += ',"'
+        for l in self.playerWinsAsWhitePaths:             
+            cvsStr += os.path.splitext(ntpath.basename(l))[0] + ', '
+                
+        cvsStr += '","'
+        for l1 in self.playerLoseAsWhitePaths:
+            cvsStr += os.path.splitext(ntpath.basename(l1))[0] + ', '
+        
+        cvsStr += '","'
+        for l2 in self.playerDrawsAsWhitePaths:
+            cvsStr += os.path.splitext(ntpath.basename(l2))[0] + ', '
+        cvsStr += '"'
+
+        return cvsStr
+        
+    def getPlayerAsBlackCSVData(self):
+        #cvs format: 
+        # White opening - Black counter (player), 
+        # Fraction of player wins, 
+        # Fraction of player losses, 
+        # Fraction of draws, 
+        # Nr of games, 
+        # List of games won, 
+        # List of games lost, 
+        # List of games drawn
+        
+        stat = self.getPlayerStatistics()
+        cvsStr  = self.getName()
+        if stat['TotalNrGamesAsBlack'] != 0:
+            cvsStr += ',' + str(stat['NrWinsAsBlack']/stat['TotalNrGamesAsBlack'])
+            cvsStr += ',' + str(stat['NrLossesAsBlack']/stat['TotalNrGamesAsBlack'])
+            cvsStr += ',' + str(stat['NrDrawsAsBlack']/stat['TotalNrGamesAsBlack'])
+            cvsStr += ',' + str(stat['TotalNrGamesAsBlack'])
+        else:
+            cvsStr += ',0,0,0,0'
+            
+        cvsStr += ',"'
+        for l in self.playerWinsAsBlackPaths:             
+            cvsStr += os.path.splitext(ntpath.basename(l))[0] + ', '
+                
+        cvsStr += '","'
+        for l1 in self.playerLoseAsBlackPaths:
+            cvsStr += os.path.splitext(ntpath.basename(l1))[0] + ', '
+        
+        cvsStr += '","'
+        for l2 in self.playerDrawsAsBlackPaths:
+            cvsStr += os.path.splitext(ntpath.basename(l2))[0] + ', '
+        cvsStr += '"'
+
+        return cvsStr
+
 def testOpeningStatistics():
     checkOnlyPLM = True
     checkOnlyTournamentRuleGames = True
@@ -243,9 +311,10 @@ def testOpeningStatistics():
     assert opening.openingGame == game1
     
     results = opening.getPlayerStatistics() 
-    facit = {'Opening' : 'wP - bM', \
+    facit = {'Opening'        : 'wP - bM', \
              'Player'         : 'Eucalyx', \
-             'TotalNrGames'   : 1, \
+             'TotalNrGamesAsWhite'   : 1, \
+             'TotalNrGamesAsBlack'   : 0, \
              'NrWinsAsWhite'  : 0, \
              'NrDrawsAsWhite' : 1, \
              'NrLossesAsWhite': 0, \

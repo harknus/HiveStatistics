@@ -155,6 +155,8 @@ if analysisType == 'TwoBugOpening':
     
     filePath = "../Statistics/TwoBugOpeningStatistics.csv"
     stat['Hive-PLM'].exportSummaryStatistics("../Statistics/TwoBugSummaryStatistics.csv");
+    if stat['Hive-PLM'].hasPlayerToProfile(): 
+       stat['Hive-PLM'].exportPlayerStatistics("../Statistics/")
 else:
     filePath = "../Statistics/8-moveOpeningStatistics.csv"
 
