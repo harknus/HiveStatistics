@@ -144,7 +144,8 @@ class Statistics :
         #Header
         csvStr  = self.playerToProfile + ' statistics - two bug opening \n'
         csvStr += 'Total nr of ' + self.gameType + ' games processed:,' + str(self.totalNrGames) + '\n'
-        csvStr += 'White opening (player) - Black counter, Fraction of player wins, Fraction of player losses, Fraction of draws, Nr of games, List of games won, List of games lost, List of games drawn \n'
+        csvStr += '\n' + self.playerToProfile + ' playing white \n'
+        csvStr += 'Opening, Fraction of player wins, Fraction of player losses, Fraction of draws, Nr of games, List of games won, List of games lost, List of games drawn \n'
         
         #Extract all statistics from the openings
         #sort the data on name
@@ -154,7 +155,8 @@ class Statistics :
             csvStr += '\n'
             
         csvStr += '\n'
-        csvStr += 'White opening - Black counter (player), Fraction of player wins, Fraction of player losses, Fraction of draws, Nr of games, List of games won, List of games lost, List of games drawn \n'
+        csvStr += self.playerToProfile + ' playing black \n'
+        csvStr += 'Opening, Fraction of player wins, Fraction of player losses, Fraction of draws, Nr of games, List of games won, List of games lost, List of games drawn \n'
         
         for op in sortedOpeningList:
             csvStr += op.getPlayerAsBlackCSVData()
@@ -164,7 +166,10 @@ class Statistics :
         #to the summary statistics to get the good formatting output
         #Start with the player being white
         csvStr += '\n'
-        csvStr += 'Player statistics for playing white \n'
+        csvStr += self.playerToProfile + ' playing white - fraction of wins\n'
+        csvStr += ' , ' + self.playerToProfile + ' opening as white, Black counter \n'
+        csvStr += ' , fraction of player wins using this opening, fraction of player wins when facing this black counter \n'
+        
         subLists = list()# this is a nested list
         wBugs = ['wM', 'wL', 'wP', 'wG', 'wA', 'wB', 'wS']
         for wBug in wBugs:
@@ -206,9 +211,11 @@ class Statistics :
         
         #Then do the same for player being black
         csvStr += '\n'
-        csvStr += 'Player statistics for playing black \n'
+        csvStr += self.playerToProfile + ' playing black - fraction of wins\n'
+        csvStr += ' , White opening, ' + self.playerToProfile + ' counter as black \n'
+        csvStr += ' , fraction of player wins vs this opening, fraction of player wins using this black counter\n'
         
-        subLists = list()# this is a nested list
+        subLists = list() # this is a nested list
         bBugs = ['bM', 'bL', 'bP', 'bG', 'bA', 'bB', 'bS']
         for bBug in bBugs:
             openings = [x for x in sortedOpeningList if bBug in x.getName()]

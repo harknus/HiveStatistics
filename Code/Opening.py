@@ -36,7 +36,7 @@ class Opening :
         if self.hasPlayerToProfile() :
             nrPlayerWinsWhite  = len(self.playerWinsAsWhitePaths)
             nrPlayerDrawsWhite = len(self.playerDrawsAsWhitePaths)
-            nrPlayerLoseWhite  = len(self.playerLoseAsBlackPaths)
+            nrPlayerLoseWhite  = len(self.playerLoseAsWhitePaths)
             nrPlayerWinsBlack  = len(self.playerWinsAsBlackPaths)
             nrPlayerDrawsBlack = len(self.playerDrawsAsBlackPaths)
             nrPlayerLoseBlack  = len(self.playerLoseAsBlackPaths)
@@ -52,7 +52,7 @@ class Opening :
                        'NrLossesAsWhite': nrPlayerLoseWhite, \
                        'NrWinsAsBlack'  : nrPlayerWinsBlack, \
                        'NrDrawsAsBlack' : nrPlayerDrawsBlack, \
-                       'NrLossesAsBlack': nrPlayerWinsBlack }
+                       'NrLossesAsBlack': nrPlayerLoseBlack }
             return results
         else:
             return None
@@ -231,7 +231,7 @@ class Opening :
             cvsStr += ',' + str(stat['NrDrawsAsWhite']/stat['TotalNrGamesAsWhite'])
             cvsStr += ',' + str(stat['TotalNrGamesAsWhite'])
         else:
-            cvsStr += ',0,0,0,0'
+            cvsStr += ', , , ,0'
         cvsStr += ',"'
         for l in self.playerWinsAsWhitePaths:             
             cvsStr += os.path.splitext(ntpath.basename(l))[0] + ', '
@@ -266,7 +266,7 @@ class Opening :
             cvsStr += ',' + str(stat['NrDrawsAsBlack']/stat['TotalNrGamesAsBlack'])
             cvsStr += ',' + str(stat['TotalNrGamesAsBlack'])
         else:
-            cvsStr += ',0,0,0,0'
+            cvsStr += ', , , ,0'
             
         cvsStr += ',"'
         for l in self.playerWinsAsBlackPaths:             
