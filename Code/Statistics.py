@@ -139,10 +139,11 @@ class Statistics :
         file.close()
     
     def exportPlayerStatistics(self, folder):
-        savePath = folder + self.playerToProfile + '.csv'
+        savePath = folder + 'playerProfile_' + self.playerToProfile + '.csv'
         
         #Header
-        csvStr  = self.playerToProfile + 'statistics - two bug opening \n'
+        csvStr  = self.playerToProfile + ' statistics - two bug opening \n'
+        csvStr += 'Total nr of ' + self.gameType + ' games processed:,' + str(self.totalNrGames) + '\n'
         csvStr += 'White opening (player) - Black counter, Fraction of player wins, Fraction of player losses, Fraction of draws, Nr of games, List of games won, List of games lost, List of games drawn \n'
         
         #Extract all statistics from the openings
@@ -150,17 +151,19 @@ class Statistics :
         sortedOpeningList = sorted(self.openingStatList, key=lambda x: x.getName(), reverse=False)
         for op in sortedOpeningList:
             csvStr += op.getPlayerAsWhiteCSVData()
+            csvStr += '\n'
             
-        csvStr += '\n\n'
+        csvStr += '\n'
         csvStr += 'White opening - Black counter (player), Fraction of player wins, Fraction of player losses, Fraction of draws, Nr of games, List of games won, List of games lost, List of games drawn \n'
         
         for op in sortedOpeningList:
             csvStr += op.getPlayerAsBlackCSVData()
+            csvStr += '\n'
         
         #get the Player win fractions as a matrix, now we need to do similar 
         #to the summary statistics to get the good formatting output
         #Start with the player being white
-        csvStr += '\n\n'
+        csvStr += '\n'
         csvStr += 'Player statistics for playing white \n'
         subLists = list()# this is a nested list
         wBugs = ['wM', 'wL', 'wP', 'wG', 'wA', 'wB', 'wS']
@@ -169,15 +172,15 @@ class Statistics :
             #now calculate the player win rate as white for this white opening
            
             nrGames = 0
-            nrWhiteWinsAsWhite = 0
+            nrWinsAsWhite = 0
             for op in openings:
                 stat = op.getPlayerStatistics()
                 nrGames += stat['TotalNrGamesAsWhite']
-                nrWhiteWinsAsWhite += stat['NrWinsAsWhite']
+                nrWinsAsWhite += stat['NrWinsAsWhite']
             if nrGames == 0:
                 playerAsWhiteWinRatio = 0
             else:
-                playerAsWhiteWinRatio = nrWhiteWinsAsWhite / nrGames
+                playerAsWhiteWinRatio = nrWinsAsWhite / nrGames
                 #Store it as tuples in the list
                 subLists.append( (playerAsWhiteWinRatio, openings, nrGames) )
         
@@ -185,8 +188,10 @@ class Statistics :
         for sublist in sortedSubLists:
             sublist[1].sort(key=lambda x: x.getPlayerStatistics()['NrWinsAsWhite'], reverse = True)
             tmp = sublist[1][0].getName()
-            cvsStr1 = tmp[:tmp.find(' ')]
-            cvsStr2 = str(sublist[0])
+            cvsStr1 = 'Total nr games'
+            cvsStr2 = str(sublist[2])
+            cvsStr1 += ',' + tmp[:tmp.find(' ')]
+            cvsStr2 += ',' + str(sublist[0])
             for op in sublist[1]:
                 name = op.getName()
                 cvsStr1 += ',' + name[name.find('b'):]
@@ -194,12 +199,8 @@ class Statistics :
                 if stat['TotalNrGamesAsWhite'] != 0:
                     cvsStr2 += ',' + str(stat['NrWinsAsWhite']/stat['TotalNrGamesAsWhite'])
                 else:
-                    cvsStr2 += ', 0'
+                    cvsStr2 += ', --'
                     
-
-            cvsStr1 += ', Total nr games'
-            cvsStr2 += ',' + str(sublist[2])
-
             csvStr += cvsStr1 + '\n'
             csvStr += cvsStr2 + '\n'
         
@@ -214,15 +215,15 @@ class Statistics :
             #now calculate the player win rate as white for this white opening
            
             nrGames = 0
-            nrWhiteWinsAsBlack = 0
+            nrWinsAsBlack = 0
             for op in openings:
                 stat = op.getPlayerStatistics()
                 nrGames += stat['TotalNrGamesAsBlack']
-                nrWhiteWinsAsBlack += stat['NrWinsAsBlack']
+                nrWinsAsBlack += stat['NrWinsAsBlack']
             if nrGames == 0:
                 playerAsBlackWinRatio = 0
             else:
-                playerAsBlackWinRatio = nrWhiteWinsAsBlack / nrGames
+                playerAsBlackWinRatio = nrWinsAsBlack / nrGames
                 #Store it as tuples in the list
                 subLists.append( (playerAsBlackWinRatio, openings, nrGames) )
         
@@ -230,19 +231,20 @@ class Statistics :
         for sublist in sortedSubLists:
             sublist[1].sort(key=lambda x: x.getPlayerStatistics()['NrWinsAsBlack'], reverse = True)
             tmp = sublist[1][0].getName()
-            cvsStr1 = tmp[:tmp.find(' ')]
-            cvsStr2 = str(sublist[0])
+        
+            cvsStr1 = 'Total nr games'
+            cvsStr2 = str(sublist[2])
+            cvsStr1 += ',' + tmp[tmp.find('b'):]
+            cvsStr2 += ',' + str(sublist[0])
+        
             for op in sublist[1]:
                 name = op.getName()
-                cvsStr1 += ',' + name[name.find('b'):]
+                cvsStr1 += ',' + name[:name.find(' ')]
                 stat = op.getPlayerStatistics()
                 if stat['TotalNrGamesAsBlack'] != 0:
                     cvsStr2 += ',' + str(stat['NrWinsAsBlack']/stat['TotalNrGamesAsBlack'])
                 else: 
-                    cvsStr2 += ',0'
-
-            cvsStr1 += ', Total nr games'
-            cvsStr2 += ',' + str(sublist[2])
+                    cvsStr2 += ',--'
 
             csvStr += cvsStr1 + '\n'
             csvStr += cvsStr2 + '\n'
