@@ -143,7 +143,7 @@ class Statistics :
         
         #Header
         csvStr  = self.playerToProfile + ' statistics - two bug opening \n'
-        csvStr += 'Total nr of ' + self.gameType + ' games processed:,' + str(self.totalNrGames) + '\n'
+        csvStr += 'Total nr of ' + self.gameType + ' games processed: ' + str(self.totalNrGames) + '\n'
         csvStr += '\n' + self.playerToProfile + ' playing white \n'
         csvStr += 'Opening, Fraction of player wins, Fraction of player losses, Fraction of draws, Nr of games, List of games won, List of games lost, List of games drawn \n'
         
@@ -213,7 +213,7 @@ class Statistics :
         csvStr += '\n'
         csvStr += self.playerToProfile + ' playing black - fraction of wins\n'
         csvStr += ' , White opening, ' + self.playerToProfile + ' counter as black \n'
-        csvStr += ' , fraction of player wins vs this opening, fraction of player wins using this black counter\n'
+        csvStr += ' , fraction of player wins using this counter, fraction of player wins vs this white opening \n'
         
         subLists = list() # this is a nested list
         bBugs = ['bM', 'bL', 'bP', 'bG', 'bA', 'bB', 'bS']

@@ -233,16 +233,26 @@ class Opening :
         else:
             cvsStr += ', , , ,0'
         cvsStr += ',"'
-        for l in self.playerWinsAsWhitePaths:             
-            cvsStr += os.path.splitext(ntpath.basename(l))[0] + ', '
+        if len(self.playerWinsAsWhitePaths) == 0:
+            cvsStr += '-'
+        else:
+            for l in self.playerWinsAsWhitePaths:             
+                cvsStr += os.path.splitext(ntpath.basename(l))[0] + ', '
                 
         cvsStr += '","'
-        for l1 in self.playerLoseAsWhitePaths:
-            cvsStr += os.path.splitext(ntpath.basename(l1))[0] + ', '
+        if len(self.playerLoseAsWhitePaths) == 0:
+            cvsStr += '-'
+        else:
+            for l1 in self.playerLoseAsWhitePaths:
+                cvsStr += os.path.splitext(ntpath.basename(l1))[0] + ', '
         
         cvsStr += '","'
-        for l2 in self.playerDrawsAsWhitePaths:
-            cvsStr += os.path.splitext(ntpath.basename(l2))[0] + ', '
+        if len(self.playerDrawsAsWhitePaths) == 0:
+            cvsStr += '-'
+        else:
+            for l2 in self.playerDrawsAsWhitePaths:
+                cvsStr += os.path.splitext(ntpath.basename(l2))[0] + ', '
+        
         cvsStr += '"'
 
         return cvsStr
@@ -269,16 +279,25 @@ class Opening :
             cvsStr += ', , , ,0'
             
         cvsStr += ',"'
-        for l in self.playerWinsAsBlackPaths:             
-            cvsStr += os.path.splitext(ntpath.basename(l))[0] + ', '
+        if len(self.playerWinsAsBlackPaths) == 0:
+            cvsStr += '-'
+        else: 
+            for l in self.playerWinsAsBlackPaths:             
+                cvsStr += os.path.splitext(ntpath.basename(l))[0] + ', '
                 
         cvsStr += '","'
-        for l1 in self.playerLoseAsBlackPaths:
-            cvsStr += os.path.splitext(ntpath.basename(l1))[0] + ', '
+        if len(self.playerLoseAsBlackPaths) == 0:
+            cvsStr += '-'
+        else: 
+            for l1 in self.playerLoseAsBlackPaths:
+                cvsStr += os.path.splitext(ntpath.basename(l1))[0] + ', '
         
         cvsStr += '","'
-        for l2 in self.playerDrawsAsBlackPaths:
-            cvsStr += os.path.splitext(ntpath.basename(l2))[0] + ', '
+        if len(self.playerDrawsAsBlackPaths) == 0:
+            cvsStr += '-'
+        else:
+            for l2 in self.playerDrawsAsBlackPaths:
+                cvsStr += os.path.splitext(ntpath.basename(l2))[0] + ', '
         cvsStr += '"'
 
         return cvsStr
