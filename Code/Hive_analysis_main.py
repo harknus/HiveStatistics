@@ -56,11 +56,12 @@ removeRobots = False
 
 if filterOnPlayers :
     #player = 'Gandac'
-    # players = ['Frasco92']
+    #players = ['Frasco92']
     #players = ['Loizz']
-    #players = ['HappyKiwi']
+    players = ['HappyKiwi']
     #players = ['Eucalyx']
-    players = ['Quodlibet']
+    #players = ['Quodlibet']
+    #players = ['csigeee']
     
     #players = ['Eucalyx', 'Gandac', 'Frasco92', 'Loizz', 'ringersoll', \
                # 'davideg', 'Quodlibet', 'fbaumann', 'tzimarou', 'stepanzo', \

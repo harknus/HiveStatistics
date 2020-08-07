@@ -43,6 +43,16 @@ class Opening :
             totalNrGamesAsWhite = nrPlayerWinsWhite + nrPlayerDrawsWhite + nrPlayerLoseWhite
             totalNrGamesAsBlack = nrPlayerWinsBlack + nrPlayerDrawsBlack + nrPlayerLoseBlack 
             
+            if totalNrGamesAsWhite != 0:
+                fracWinsAsWhite = nrPlayerWinsWhite / totalNrGamesAsWhite
+            else:
+                fracWinsAsWhite = 0
+                
+            if totalNrGamesAsBlack != 0:
+                fracWinsAsBlack = nrPlayerWinsBlack / totalNrGamesAsBlack
+            else:
+                fracWinsAsBlack = 0
+                            
             results = {'Opening'        : self.getName(), \
                        'Player'         : self.playerToProfile, \
                        'TotalNrGamesAsWhite'   : totalNrGamesAsWhite, \
@@ -52,7 +62,9 @@ class Opening :
                        'NrLossesAsWhite': nrPlayerLoseWhite, \
                        'NrWinsAsBlack'  : nrPlayerWinsBlack, \
                        'NrDrawsAsBlack' : nrPlayerDrawsBlack, \
-                       'NrLossesAsBlack': nrPlayerLoseBlack }
+                       'NrLossesAsBlack': nrPlayerLoseBlack, \
+                       'FractionOfWinsAsWhite' : fracWinsAsWhite, \
+                       'FractionOfWinsAsBlack' : fracWinsAsBlack}
             return results
         else:
             return None
@@ -339,6 +351,8 @@ def testOpeningStatistics():
              'NrLossesAsWhite': 0, \
              'NrWinsAsBlack'  : 0, \
              'NrDrawsAsBlack' : 0, \
-             'NrLossesAsBlack': 0}
+             'NrLossesAsBlack': 0, \
+             'FractionOfWinsAsWhite' : 0, \
+             'FractionOfWinsAsBlack' : 0}
     assert results == facit
     

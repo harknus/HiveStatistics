@@ -191,20 +191,18 @@ class Statistics :
         
         sortedSubLists = sorted(subLists,  key=lambda x: x[0], reverse=True)
         for sublist in sortedSubLists:
-            sublist[1].sort(key=lambda x: x.getPlayerStatistics()['NrWinsAsWhite'], reverse = True)
+            sublist[1].sort(key=lambda x: x.getPlayerStatistics()['FractionOfWinsAsWhite'], reverse = True)
             tmp = sublist[1][0].getName()
             cvsStr1 = 'Total nr games'
             cvsStr2 = str(sublist[2])
             cvsStr1 += ',' + tmp[:tmp.find(' ')]
             cvsStr2 += ',' + str(sublist[0])
             for op in sublist[1]:
-                name = op.getName()
-                cvsStr1 += ',' + name[name.find('b'):]
                 stat = op.getPlayerStatistics()
                 if stat['TotalNrGamesAsWhite'] != 0:
+                    name = op.getName()
+                    cvsStr1 += ',' + name[name.find('b'):]
                     cvsStr2 += ',' + str(stat['NrWinsAsWhite']/stat['TotalNrGamesAsWhite'])
-                else:
-                    cvsStr2 += ', --'
                     
             csvStr += cvsStr1 + '\n'
             csvStr += cvsStr2 + '\n'
@@ -212,13 +210,12 @@ class Statistics :
         #Then do the same for player being black
         csvStr += '\n'
         csvStr += self.playerToProfile + ' playing black - fraction of wins\n'
-        csvStr += ' , White opening, ' + self.playerToProfile + ' counter as black \n'
-        csvStr += ' , fraction of player wins using this counter, fraction of player wins vs this white opening \n'
+        csvStr += ' ,White opening, ' + self.playerToProfile + ' counter as black \n'
+        csvStr += ' ,fraction of player wins vs this white opening, fraction of player wins using this counter \n'
         
         subLists = list() # this is a nested list
-        bBugs = ['bM', 'bL', 'bP', 'bG', 'bA', 'bB', 'bS']
-        for bBug in bBugs:
-            openings = [x for x in sortedOpeningList if bBug in x.getName()]
+        for wBug in wBugs:
+            openings = [x for x in sortedOpeningList if wBug in x.getName()]
             #now calculate the player win rate as white for this white opening
            
             nrGames = 0
@@ -236,25 +233,64 @@ class Statistics :
         
         sortedSubLists = sorted(subLists,  key=lambda x: x[0], reverse=True)
         for sublist in sortedSubLists:
-            sublist[1].sort(key=lambda x: x.getPlayerStatistics()['NrWinsAsBlack'], reverse = True)
+            sublist[1].sort(key=lambda x: x.getPlayerStatistics()['FractionOfWinsAsBlack'], reverse = True)
             tmp = sublist[1][0].getName()
         
             cvsStr1 = 'Total nr games'
             cvsStr2 = str(sublist[2])
-            cvsStr1 += ',' + tmp[tmp.find('b'):]
+            cvsStr1 += ',' + tmp[:tmp.find(' ')]
             cvsStr2 += ',' + str(sublist[0])
         
             for op in sublist[1]:
-                name = op.getName()
-                cvsStr1 += ',' + name[:name.find(' ')]
                 stat = op.getPlayerStatistics()
                 if stat['TotalNrGamesAsBlack'] != 0:
+                    name = op.getName()
+                    cvsStr1 += ',' + name[name.find('b'):]
                     cvsStr2 += ',' + str(stat['NrWinsAsBlack']/stat['TotalNrGamesAsBlack'])
-                else: 
-                    cvsStr2 += ',--'
 
             csvStr += cvsStr1 + '\n'
             csvStr += cvsStr2 + '\n'
+        
+        # subLists = list() # this is a nested list
+        # bBugs = ['bM', 'bL', 'bP', 'bG', 'bA', 'bB', 'bS']
+        # for bBug in bBugs:
+        #     openings = [x for x in sortedOpeningList if bBug in x.getName()]
+        #     #now calculate the player win rate as white for this white opening
+           
+        #     nrGames = 0
+        #     nrWinsAsBlack = 0
+        #     for op in openings:
+        #         stat = op.getPlayerStatistics()
+        #         nrGames += stat['TotalNrGamesAsBlack']
+        #         nrWinsAsBlack += stat['NrWinsAsBlack']
+        #     if nrGames == 0:
+        #         playerAsBlackWinRatio = 0
+        #     else:
+        #         playerAsBlackWinRatio = nrWinsAsBlack / nrGames
+        #         #Store it as tuples in the list
+        #         subLists.append( (playerAsBlackWinRatio, openings, nrGames) )
+        
+        # sortedSubLists = sorted(subLists,  key=lambda x: x[0], reverse=True)
+        # for sublist in sortedSubLists:
+        #     sublist[1].sort(key=lambda x: x.getPlayerStatistics()['NrWinsAsBlack'], reverse = True)
+        #     tmp = sublist[1][0].getName()
+        
+        #     cvsStr1 = 'Total nr games'
+        #     cvsStr2 = str(sublist[2])
+        #     cvsStr1 += ',' + tmp[tmp.find('b'):]
+        #     cvsStr2 += ',' + str(sublist[0])
+        
+        #     for op in sublist[1]:
+        #         name = op.getName()
+        #         cvsStr1 += ',' + name[:name.find(' ')]
+        #         stat = op.getPlayerStatistics()
+        #         if stat['TotalNrGamesAsBlack'] != 0:
+        #             cvsStr2 += ',' + str(stat['NrWinsAsBlack']/stat['TotalNrGamesAsBlack'])
+        #         else: 
+        #             cvsStr2 += ',--'
+
+        #     csvStr += cvsStr1 + '\n'
+        #     csvStr += cvsStr2 + '\n'
         
         
         file = open(savePath, 'w+', encoding="utf-8")
